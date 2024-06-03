@@ -1,30 +1,17 @@
-cmake_minimum_required(VERSION 3.10)
-project(MapProject)
+cmake_minimum_required(VERSION 3.4)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# GoogleTest
-include(FetchContent)
-FetchContent_Declare(
-  googletest
-  URL https://github.com/google/googletest/archive/refs/tags/release-1.10.0.tar.gz
-)
-# Для Windows: Предотвращаем переопределение параметров компилятора/линкера родительского проекта
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
-
-# Отключаем обработку предупреждений как ошибок для Google Test
-target_compile_options(gtest PRIVATE -Wno-error=maybe-uninitialized)
-
-# Отключаем обработку предупреждений о неинициализированных переменных как ошибок
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error=maybe-uninitialized")
-
-enable_testing()
-
-# Добавляем исполняемые файлы для тестов
-add_executable(tests tests.cpp)
-target_link_libraries(tests gtest_main)
-
-include(GoogleTest)
-gtest_discover_tests(tests)
+project(app)
+add_executable(mt ${CMAKE_SOURCE_DIR}/map.cpp)
+if (BUILD_TESTS)
+  add_subdirectory(third-party/gtest)
+  enable_testing()
+  include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
+  include_directories(${gmock_SOURCE_DIR}/include ${gmock_SOURCE_DIR})  
+  file(GLOB ACCOUNT_TEST_SOURCES tests.cpp)
+  add_executable(check ${ACCOUNT_TEST_SOURCES})
+  target_link_libraries(check gtest gtest_main gmock)
+  add_test(NAME check COMMAND check)
+endif ()
